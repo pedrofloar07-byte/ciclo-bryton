@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: Dominio Total del Ciclo Brayton</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] },
+                    colors: { brand: { dark: '#0b0f19', card: '#151c2c', teal: '#14b8a6', blue: '#0284c7', orange: '#f97316', highlight: '#2dd4bf' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos y transiciones para las diapositivas interactivas */
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(10px);
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Ajustar contenedor para proyección */
+        .presentation-frame {
+            width: 1280px;
+            height: 720px;
+            background-color: #0b0f19;
+            border: 1px solid #1e293b;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .formula-card {
+            background: rgba(20, 184, 166, 0.05);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        math {
+            font-size: 22px;
+            color: #2dd4bf;
+        }
+        .svg-label { font-size: 11px; fill: #94a3b8; font-family: 'Inter', sans-serif; }
+        .svg-node { fill: #0b0f19; stroke: #14b8a6; stroke-width: 2; }
+        .svg-path { fill: none; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4; }
+        .svg-cycle { fill: rgba(20, 184, 166, 0.1); stroke: #14b8a6; stroke-width: 3; }
+        .svg-cycle-real { fill: rgba(244, 63, 94, 0.05); stroke: #f43f5e; stroke-width: 2.5; stroke-dasharray: 6 3; }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-screen flex flex-col justify-center items-center py-6 select-none font-sans text-slate-100 overflow-hidden">
+
+    <!-- CONTENEDOR DE LA PRESENTACIÓN DE DIAPOSITIVAS (1280x720 Fijo para evitar descuadres en proyectores) -->
+    <div class="presentation-frame rounded-2xl flex flex-col justify-between p-10 relative overflow-hidden">
+        
+        <!-- HEADER DE NAVEGACIÓN GLOBAL -->
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-2 z-10">
+            <div class="flex items-center gap-3">
+                <span class="bg-brand-teal/20 text-brand-teal px-3 py-1 rounded-full text-xs font-bold tracking-widest font-display">MASTERCLASS</span>
+                <span class="text-sm text-slate-400" id="current-section-title">Introducción</span>
+            </div>
+            <!-- Indicador visual de puntos -->
+            <div class="flex gap-2" id="nav-dots">
+                <!-- Se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <!-- CONTENEDOR DE DIAPOSITIVAS INDIVIDUALES -->
+        <div class="flex-grow flex items-center justify-center py-4 z-10">
+
+            <!-- SLIDE 1: PORTADA -->
+            <div class="slide active w-full flex-col justify-center items-center text-center space-y-6" data-section="Introducción">
+                <h1 class="text-7xl font-display font-extrabold text-white tracking-tight">
+                    El Ciclo <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-teal to-brand-blue">Brayton</span>
+                </h1>
+                <p class="text-2xl text-slate-400 max-w-3xl leading-relaxed">
+                    De la termodinámica fundamental a la ingeniería avanzada: el corazón de las plantas de potencia y la aviación aeroespacial.
+                </p>
+                <div class="w-24 h-1 bg-brand-teal"></div>
+                <div class="grid grid-cols-3 gap-6 w-full max-w-4xl pt-4">
+                    <div class="bg-brand-card/60 p-4 rounded-xl border border-slate-800 text-left">
+                        <span class="text-brand-teal font-bold text-xs">FÁCIL DE ENTENDER</span>
+                        <p class="text-xs text-slate-400 mt-1">Explicado paso a paso con analogías y bases históricas claras.</p>
+                    </div>
+                    <div class="bg-brand-card/60 p-4 rounded-xl border border-slate-800 text-left">
+                        <span class="text-brand-blue font-bold text-xs">MATEMÁTICA LIMPIA</span>
+                        <p class="text-xs text-slate-400 mt-1">Ecuaciones perfectamente legibles y diagramas SVG nativos integrados.</p>
+                    </div>
+                    <div class="bg-brand-card/60 p-4 rounded-xl border border-slate-800 text-left">
+                        <span class="text-brand-orange font-bold text-xs">AVANCE GRADUAL</span>
+                        <p class="text-xs text-slate-400 mt-1">De la teoría básica de Çengel a los motores de reacción aeronáuticos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: HISTORIA E IDENTIDAD -->
+            <div class="slide w-full flex-col gap-6" data-section="Orígenes">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">George Brayton y la Máquina Rotatoria</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4 text-slate-300">
+                        <p><strong>George Brayton</strong> propuso este ciclo en 1870 para motores de pistón que quemaban aceite.</p>
+                        <p>Hoy en día, el ciclo ya no usa pistones; opera de manera mucho más eficiente en <strong>maquinaria rotatoria continua</strong> (compresores de flujo y turbinas).</p>
+                        <div class="bg-brand-card p-4 rounded-xl border border-slate-800/80">
+                            <h4 class="text-brand-teal font-semibold text-sm">La Ventaja Clave del Ciclo Abierto:</h4>
+                            <p class="text-xs text-slate-400 mt-1">Las turbinas de gas son ligeras, compactas y poseen una relación potencia-peso extremadamente alta comparada con los motores diésel tradicionales.</p>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                        <h4 class="text-brand-orange font-semibold text-sm mb-2"><i class="fa-solid fa-lightbulb mr-2"></i>La Analogía de la Esponja (Básico):</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Pensemos en el aire como una esponja:
+                            <br><span class="text-brand-blue font-bold">1. Compresión:</span> La aprietas con fuerza (Compresor).
+                            <br><span class="text-brand-orange font-bold">2. Combustión:</span> Le aplicas calor (Cámara de combustión). La energía interna de la esponja se dispara.
+                            <br><span class="text-brand-teal font-bold">3. Expansión:</span> La dejas expandirse contra las aspas de un molino para producir movimiento útil (Turbina).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: LA SUPOSICIÓN DE AIRE ESTÁNDAR -->
+            <div class="slide w-full flex-col gap-6" data-section="Teoría Básica">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">Abierto vs. Cerrado (Aire Estándar)</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4 text-slate-300">
+                        <p>En la realidad, una turbina opera en un <strong>ciclo abierto</strong> (el escape se pierde en la atmósfera). Sin embargo, para estudiarlo físicamente, lo idealizamos como un <strong>ciclo cerrado</strong>.</p>
+                        <p>Para lograr esta idealización, aplicamos las <strong>Suposiciones de Aire Estándar Frío</strong>:</p>
+                        <ul class="space-y-1.5 text-xs text-slate-400 list-disc pl-5">
+                            <li>El fluido de trabajo es aire que siempre se comporta como gas ideal.</li>
+                            <li>La combustión química se reemplaza por una transferencia de calor externa a presión constante.</li>
+                            <li>El escape de gases calientes se reemplaza por un enfriamiento a presión constante para devolver el aire al estado 1.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 flex flex-col justify-center items-center">
+                        <h4 class="text-xs font-mono text-brand-teal mb-4">Ciclo de Combustión Externa Estándar</h4>
+                        <svg viewBox="0 0 400 200" width="100%" class="svg-diag">
+                            <!-- Compresor -->
+                            <polygon points="40,50 110,70 110,130 40,150" class="svg-node" style="stroke: #3b82f6; fill: rgba(59, 130, 246, 0.05);"/>
+                            <text x="50" y="105" fill="#3b82f6" font-size="10" font-weight="bold">Compresor</text>
+                            <!-- Intercambiador superior -->
+                            <rect x="150" y="20" width="100" height="40" rx="4" class="svg-node" style="stroke: #f97316;"/>
+                            <text x="160" y="45" fill="#f97316" font-size="9" font-weight="bold">Adición Calor q_ent</text>
+                            <!-- Turbina -->
+                            <polygon points="340,50 270,70 270,130 340,150" class="svg-node" style="stroke: #fbbf24; fill: rgba(251, 191, 36, 0.05);"/>
+                            <text x="285" y="105" fill="#fbbf24" font-size="10" font-weight="bold">Turbina</text>
+                            <!-- Intercambiador inferior -->
+                            <rect x="150" y="140" width="100" height="40" rx="4" class="svg-node" style="stroke: #0284c7;"/>
+                            <text x="160" y="165" fill="#0284c7" font-size="9" font-weight="bold">Rechazo Calor q_sal</text>
+                            
+                            <!-- Conexiones -->
+                            <path d="M 110,100 L 150,40 M 250,40 L 270,100 M 270,110 L 250,160 M 150,160 L 110,110" stroke="#475569" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: BRAYTON VS OTTO Y DIESEL -->
+            <div class="slide w-full flex-col gap-6" data-section="Comparativa">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">Diferencias Clave: Otto vs. Brayton</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300">Es importante no confundir el ciclo de tu coche (Otto o Diésel) con el de una turbina de gas (Brayton):</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-brand-card p-4 rounded-lg border border-slate-800">
+                                <span class="text-brand-orange font-bold text-xs">CICLOS DE PISTÓN (Otto)</span>
+                                <p class="text-xs text-slate-400 mt-2">Operan en procesos intermitentes (cuatro tiempos discontinuos) donde el volumen cambia drásticamente.</p>
+                            </div>
+                            <div class="bg-brand-teal/5 p-4 rounded-lg border border-brand-teal/20">
+                                <span class="text-brand-teal font-bold text-xs">CICLOS ROTATORIOS (Brayton)</span>
+                                <p class="text-xs text-slate-400 mt-2">Operan con flujo constante y continuo a través de turbomaquinaria. La adición de calor se asume a presión constante.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-6 rounded-2xl border border-slate-800 space-y-3">
+                        <h4 class="text-white font-bold text-sm">Resumen de Parámetros Físicos:</h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between border-b border-slate-800 pb-1.5">
+                                <span class="text-slate-400">Tipo de Proceso:</span>
+                                <span class="text-brand-teal font-semibold">Flujo Estacionario Continuo</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-1.5">
+                                <span class="text-slate-400">Adición de calor:</span>
+                                <span class="text-brand-orange font-semibold">Isobárica (Presión Constante)</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-1.5">
+                                <span class="text-slate-400">Fluido de Trabajo:</span>
+                                <span class="text-brand-blue font-semibold">Gases de Combustión / Aire</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: EL DIAGRAMA T-S Y PROCESOS INTERNOS -->
+            <div class="slide w-full flex-col gap-6" data-section="Análisis Ideal">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">El Mapa del Ciclo: Diagrama T-s</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300">El comportamiento termodinámico del ciclo se representa en el diagrama <strong>Temperatura-Entropía (T-s)</strong>:</p>
+                        <ul class="space-y-2 text-xs">
+                            <li><strong>1-2: Compresión Isoentrópica.</strong> El aire se comprime en el compresor de manera ideal (sin fricción), elevando su temperatura.</li>
+                            <li><strong>2-3: Adición de calor a $P = cte$.</strong> Se inyecta calor externo aumentando la temperatura al máximo límite tolerado.</li>
+                            <li><strong>3-4: Expansión Isoentrópica.</strong> La turbina aprovecha la alta entalpía para producir trabajo útil.</li>
+                            <li><strong>4-1: Rechazo de calor a $P = cte$.</strong> Enfriamiento isobárico para reiniciar.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/30 p-6 rounded-2xl border border-slate-800 flex justify-center">
+                        <!-- SVG DIAGRAMA T-s NATIVO COMPLETO -->
+                        <svg viewBox="0 0 400 300" width="100%" class="svg-diag">
+                            <!-- Ejes -->
+                            <line x1="40" y1="260" x2="380" y2="260" stroke="#475569" stroke-width="2"/>
+                            <line x1="40" y1="260" x2="40" y2="20" stroke="#475569" stroke-width="2"/>
+                            <text x="360" y="280" class="svg-label">Entropía (s)</text>
+                            <text x="15" y="35" class="svg-label">Temp (T)</text>
+                            
+                            <!-- El Ciclo -->
+                            <path d="M 80,240 L 120,130 L 300,40 L 300,180 Z" class="svg-cycle"/>
+                            <!-- Isobaras -->
+                            <path d="M 50,220 Q 155,200 350,150" stroke="#1e293b" fill="none" stroke-dasharray="3"/>
+                            <path d="M 50,120 Q 155,90 350,25" stroke="#1e293b" fill="none" stroke-dasharray="3"/>
+
+                            <circle cx="80" cy="240" r="4" fill="#14b8a6"/> <text x="70" y="255" fill="#94a3b8" font-size="10">1</text>
+                            <circle cx="120" cy="130" r="4" fill="#14b8a6"/> <text x="110" y="120" fill="#94a3b8" font-size="10">2</text>
+                            <circle cx="300" cy="40" r="4" fill="#14b8a6"/> <text x="310" y="35" fill="#94a3b8" font-size="10">3 (T_máx)</text>
+                            <circle cx="300" cy="180" r="4" fill="#14b8a6"/> <text x="310" y="195" fill="#94a3b8" font-size="10">4</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: EFICIENCIA TERMICA Y RELACIÓN DE PRESIÓN -->
+            <div class="slide w-full flex-col gap-6" data-section="Eficiencia">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">Eficiencia y Relación de Presión</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300">La eficiencia de un ciclo ideal Brayton depende exclusivamente de la <strong>relación de presión</strong> del compresor ($r_p = P_2/P_1$) y del factor del fluido $k$:</p>
+                        <div class="formula-card">
+                            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <msub><mi>η</mi><mtext>ter,Brayton</mtext></msub>
+                                <mo>=</mo>
+                                <mn>1</mn>
+                                <mo>−</mo>
+                                <mfrac>
+                                    <mn>1</mn>
+                                    <msubsup>
+                                        <mi>r</mi>
+                                        <mi>p</mi>
+                                        <mrow>
+                                            <mo>(</mo>
+                                            <mi>k</mi>
+                                            <mo>−</mo>
+                                            <mn>1</mn>
+                                            <mo>)</mo>
+                                            <mo>/</mo>
+                                            <mi>k</mi>
+                                        </mrow>
+                                    </msubsup>
+                                </mfrac>
+                            </math>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-6 rounded-2xl border border-slate-800 space-y-3 text-xs leading-relaxed">
+                        <h4 class="text-brand-orange font-bold text-sm">El Compromiso del Diseño Físico:</h4>
+                        <p>Aunque a mayor relación de presiones la eficiencia teórica sube, la temperatura del ciclo aumenta críticamente.</p>
+                        <p>La temperatura pico ($T_3$) está limitada por la <strong>metalurgia de los álabes de la turbina</strong>. Por ende, los ingenieros deben balancear eficiencia contra durabilidad estructural del motor.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 7: TRABAJO DE RETROCESO (BWR) -->
+            <div class="slide w-full flex-col gap-6" data-section="Pérdidas">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-orange pl-4">El Trabajo de Retroceso (BWR)</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300">En una turbina de gas, el compresor requiere de un trabajo enorme para elevar la presión de un volumen masivo de gas de trabajo.</p>
+                        <p>A esta relación se le conoce como <strong>Relación de Trabajo de Retroceso (Back Work Ratio)</strong>:</p>
+                        <div class="formula-card" style="border-color: #3b82f6;">
+                            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <msub><mi>r</mi><mtext>bw</mtext></msub><mo>=</mo><mfrac><msub><mi>w</mi><mtext>comp, entrada</mtext></msub><msub><mi>w</mi><mtext>turb, salida</mtext></msub></mfrac>
+                            </math>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-6 rounded-2xl border border-slate-800 text-xs space-y-3">
+                        <h4 class="text-white font-bold text-sm">¿Por qué es tan crítico el BWR?</h4>
+                        <p>En plantas de potencia de vapor, el BWR es de apenas <strong>1% o 2%</strong>, porque bombear un líquido casi no requiere trabajo.</p>
+                        <p>En el ciclo Brayton, comprimir un gas requiere que entre el <strong>40% y el 60%</strong> de todo el trabajo generado por la turbina regrese directamente para alimentar al compresor. En ciclos reales, puede ser aún peor.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 8: DESVIACIONES E INEFICIENCIAS REALES -->
+            <div class="slide w-full flex-col gap-6" data-section="Análisis Real">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-orange pl-4">Realidad: Ineficiencias de Turbomáquinas</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4 text-slate-300">
+                        <p>En un motor real de turbina de gas, la fricción y turbulencia reducen las eficiencias isentrópicas:</p>
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
+                            <p><strong>Eficiencia del Compresor (&eta;_C):</strong> El compresor real consume más trabajo que el ideal.</p>
+                            <p><strong>Eficiencia de la Turbina (&eta;_T):</strong> La turbina real genera menos trabajo que el ideal.</p>
+                        </div>
+                        <p class="text-xs italic text-brand-orange">*El ejemplo 9-6 demuestra que eficiencias moderadas en turbomáquinas reducen la eficiencia global del 42.6% al 26.6%.</p>
+                    </div>
+                    <div class="bg-slate-900/30 p-6 rounded-2xl border border-slate-800 flex justify-center">
+                        <!-- DIAGRAMA REAL VS IDEAL SVG -->
+                        <svg viewBox="0 0 400 250" width="100%" class="svg-diag">
+                            <line x1="40" y1="210" x2="380" y2="210" stroke="#475569" stroke-width="2"/>
+                            <line x1="40" y1="210" x2="40" y2="20" stroke="#475569" stroke-width="2"/>
+                            <path d="M 80,190 L 120,90 L 300,30 L 300,140 Z" class="svg-cycle" style="fill:none;"/>
+                            <path d="M 80,190 L 150,90 L 300,30 L 340,140 Z" class="svg-cycle-real"/>
+                            
+                            <text x="145" y="75" fill="#f43f5e" font-size="10" font-weight="bold">2a (Compresor real)</text>
+                            <text x="330" y="155" fill="#f43f5e" font-size="10" font-weight="bold">4a (Turbina real)</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: CICLO CON REGENERACIÓN -->
+            <div class="slide w-full flex-col gap-6" data-section="Optimizaciones">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">9-9 Ciclo con Regeneración</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300 text-sm">En lugar de desechar los gases de escape de la turbina que salen a alta temperatura, se utiliza un intercambiador de calor para calentar el aire de salida del compresor.</p>
+                        <div class="bg-brand-card p-4 rounded-xl border border-slate-800 text-xs">
+                            <p class="font-bold text-brand-teal mb-1">Eficacia (&epsilon;):</p>
+                            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <mi>ε</mi><mo>=</mo><mfrac><mrow><msub><mi>h</mi><mn>5</mn></msub><mo>−</mo><msub><mi>h</mi><mrow><mn>2</mn><mi>a</mi></mrow></msub></mrow><mrow><msub><mi>h</mi><mrow><mn>4</mn><mi>a</mi></mrow></msub><mo>−</mo><msub><mi>h</mi><mrow><mn>2</mn><mi>a</mi></mrow></msub></mrow></mfrac>
+                            </math>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-6 rounded-2xl border border-slate-800 text-xs space-y-3">
+                        <h4 class="text-brand-orange font-bold text-sm">Restricción Física Clave:</h4>
+                        <p>Solo se recomienda si la temperatura de escape de la turbina es **mayor** que la de descarga del compresor ($T_{escape} > T_{compresor}$).</p>
+                        <p>A relaciones de presión excesivamente altas, la compresión eleva demasiado la temperatura del aire, haciendo que el regenerador enfríe el aire y reduzca la eficiencia.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 10: MEJORAS AVANZADAS (INTERENFRIADORES) -->
+            <div class="slide w-full flex-col gap-6" data-section="Optimización Pro">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-teal pl-4">9-10 Interenfriamiento y Recalentamiento</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300 text-sm">Para maximizar el trabajo neto y la eficiencia del ciclo, los diseñadores industriales acoplan el interenfriador y el recalentador junto con la regeneración:</p>
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div class="bg-brand-card p-4 rounded-lg border border-slate-800">
+                                <span class="text-brand-blue font-bold">INTERENFRIADOR</span>
+                                <p class="text-[11px] text-slate-400 mt-1">Reduce la temperatura del aire entre etapas de compresión reduciendo el trabajo del compresor.</p>
+                            </div>
+                            <div class="bg-brand-card p-4 rounded-lg border border-slate-800">
+                                <span class="text-brand-orange font-bold">RECALENTAMIENTO</span>
+                                <p class="text-[11px] text-slate-400 mt-1">Añade calor intermedio entre turbinas expandiendo el gas y multiplicando el trabajo neto.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 text-xs space-y-3">
+                        <h4 class="text-brand-teal font-bold text-sm">El Efecto Acoplado:</h4>
+                        <p>El interenfriamiento y recalentamiento por sí solos reducen la eficiencia térmica porque alteran la temperatura de adición de calor.</p>
+                        <p class="font-semibold text-slate-200">¡Únicamente mejoran la eficiencia global si se usan obligatoriamente acompañados de un regenerador!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 11: PROPULSIÓN A CHORRO (TOBERA Y DIFUSOR) -->
+            <div class="slide w-full flex-col gap-6" data-section="Propulsión">
+                <h2 class="text-4xl font-display font-bold text-white border-l-4 border-brand-orange pl-4">9-11 Propulsión por Reacción (Aviación)</h2>
+                <div class="grid grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-300">En aviación, el motor no entrega potencia a un eje rotatorio. Todo el propósito cambia a producir <strong>fuerza de empuje</strong> para impulsar la aeronave.</p>
+                        <div class="bg-brand-card p-4 rounded-xl border border-slate-800 space-y-1.5 text-xs">
+                            <p><strong>El Difusor:</strong> Desacelera el aire de entrada incrementando la presión estática.</p>
+                            <p><strong>El Turborreactor (W_neto = 0):</strong> La turbina solo produce el trabajo justo para operar el compresor.</p>
+                            <p><strong>La Tobera:</strong> Recibe gases de alta presión y los acelera a velocidades supersónicas.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
+                        <!-- ESQUEMA TURBORREACTOR COMPLETO CON DIFUSOR Y TOBERA -->
+                        <svg viewBox="0 0 450 200" width="100%">
+                            <!-- Carcasa -->
+                            <path d="M 20,80 Q 80,50 120,60 L 320,60 Q 360,50 420,80 L 420,120 Q 360,150 320,140 L 120,140 Q 80,150 20,120 Z" fill="rgba(30, 41, 59, 0.5)" stroke="#475569" stroke-width="2"/>
+                            
+                            <!-- Difusor (Entrada) -->
+                            <text x="35" y="105" fill="#38bdf8" font-size="9" font-weight="bold">Difusor</text>
+                            
+                            <!-- Compresor -->
+                            <rect x="110" y="70" width="60" height="60" rx="4" fill="#1e293b" stroke="#3b82f6"/>
+                            <text x="115" y="105" fill="#3b82f6" font-size="9" font-weight="bold">Compresor</text>
+                            
+                            <!-- Cámara -->
+                            <rect x="190" y="75" width="50" height="50" rx="4" fill="#451a03" stroke="#f97316"/>
+                            <text x="195" y="105" fill="#f97316" font-size="9" font-weight="bold">Combust.</text>
+                            
+                            <!-- Turbina -->
+                            <rect x="260" y="70" width="60" height="60" rx="4" fill="#1e293b" stroke="#fbbf24"/>
+                            <text x="270" y="105" fill="#fbbf24" font-size="9" font-weight="bold">Turbina</text>
+
+                            <!-- Tobera (Salida) -->
+                            <text x="365" y="105" fill="#f43f5e" font-size="9" font-weight="bold">Tobera</text>
+                            
+                            <!-- Chorros de Escape -->
+                            <path d="M 420,100 L 470,100" stroke="#f43f5e" stroke-width="8" stroke-dasharray="8 4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 12: CONCLUSIÓN Y PREGUNTAS -->
+            <div class="slide w-full flex-col justify-center items-center text-center space-y-6" data-section="Cierre">
+                <div class="bg-brand-teal/20 p-5 rounded-full border border-brand-teal/30">
+                    <i class="fa-solid fa-graduation-cap text-5xl text-brand-teal animate-bounce"></i>
+                </div>
+                <h2 class="text-5xl font-display font-extrabold text-white">Dominio del Ciclo Brayton</h2>
+                <p class="text-xl text-slate-400 max-w-2xl leading-relaxed">
+                    Hemos cubierto el análisis ideal simple, el impacto de las eficiencias reales, el reciclaje mediante regeneradores y la propulsión en aviación.
+                </p>
+                <p class="text-brand-teal font-bold text-lg">¿Preguntas sobre la exposición?</p>
+                <span class="text-xs text-slate-600 font-mono">Presentación Profesional • Çengel y Boles, Termodinámica</span>
+            </div>
+
+        </div>
+
+        <!-- FOOTER CON CONTROLES INTERACTIVOS REALES -->
+        <div class="flex justify-between items-center border-t border-slate-800 pt-4 z-10">
+            <!-- Barra de Progreso Dinámica -->
+            <div class="w-1/3 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="slide-progress" class="bg-gradient-to-r from-brand-teal to-brand-blue h-full w-[8%] transition-all duration-300"></div>
+            </div>
+            <!-- Controles de navegación -->
+            <div class="flex gap-4">
+                <button onclick="prevSlide()" class="bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 px-4 py-2 rounded-lg border border-slate-700 transition flex items-center gap-2 text-sm font-semibold">
+                    <i class="fa-solid fa-chevron-left"></i> Anterior
+                </button>
+                <span class="text-xs text-slate-500 font-mono self-center" id="slide-number">1 / 12</span>
+                <button onclick="nextSlide()" class="bg-gradient-to-r from-brand-teal to-brand-blue hover:from-brand-teal/80 hover:to-brand-blue/80 text-white font-semibold px-6 py-2 rounded-lg transition flex items-center gap-2 text-sm">
+                    Siguiente <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT DE INTERACTIVIDAD DE DIAPOSITIVAS (JavaScript) -->
+    <script>
+        let currentSlide = 1;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('slide-progress');
+        const slideNumberText = document.getElementById('slide-number');
+        const currentSectionTitle = document.getElementById('current-section-title');
+        const dotsContainer = document.getElementById('nav-dots');
+
+        // Generar puntos de navegación dinámicamente
+        function generateDots() {
+            dotsContainer.innerHTML = '';
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot ${i === currentSlide ? 'active' : ''}`;
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                    // Actualizar cabecera de sección actual
+                    currentSectionTitle.textContent = slide.getAttribute('data-section') || 'Exposición';
+                }
+            });
+
+            // Actualizar barra de progreso e indicador numérico
+            const progressPercent = (currentSlide / totalSlides) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            slideNumberText.textContent = `${currentSlide} / ${totalSlides}`;
+
+            // Actualizar puntos de navegación
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index + 1 === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(slideNum) {
+            currentSlide = slideNum;
+            updateSlide();
+        }
+
+        // Navegación rápida por teclado (Flechas de dirección o Barra espaciadora)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Inicializar
+        generateDots();
+        updateSlide();
+    </script>
+</body>
+</html>
