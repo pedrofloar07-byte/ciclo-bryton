@@ -53,11 +53,28 @@
         }
         .svg-label { font-size: 11px; fill: #94a3b8; font-family: 'Inter', sans-serif; }
         .svg-node { fill: #0b0f19; stroke: #14b8a6; stroke-width: 2; }
-        .svg-path { fill: none; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4; }
-        .svg-cycle { fill: rgba(20, 184, 166, 0.1); stroke: #14b8a6; stroke-width: 3; }
-        .svg-cycle-real { fill: rgba(244, 63, 94, 0.05); stroke: #f43f5e; stroke-width: 2.5; stroke-dasharray: 6 3; }
-    </style>
+.svg-label { font-size: 11px; fill: #94a3b8; font-family: 'Inter', sans-serif; }
+.svg-node { fill: #0b0f19; stroke: #14b8a6; stroke-width: 2; }
+.svg-path { fill: none; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4; }
+.svg-cycle { fill: rgba(20, 184, 166, 0.1); stroke: #14b8a6; stroke-width: 3; }
+.svg-cycle-real { fill: rgba(244, 63, 94, 0.05); stroke: #f43f5e; stroke-width: 2.5; stroke-dasharray: 6 3; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
 </head>
+
 <body class="bg-slate-950 min-h-screen flex flex-col justify-center items-center py-6 select-none font-sans text-slate-100 overflow-hidden">
 
     <!-- CONTENEDOR DE LA PRESENTACIÓN DE DIAPOSITIVAS (1280x720 Fijo para evitar descuadres en proyectores) -->
